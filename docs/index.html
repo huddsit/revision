@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14213d">
+<title>Revision</title>
+<style>
+  :root {
+    --bg: #14213d; --card: #1e2f55; --ink: #f4f6fb; --muted: #a9b4cc;
+    --accent: #fca311; --good: #2bb673; --bad: #e5484d; --line: #2c3f6b;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 17px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { min-height: 100dvh; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 18px 16px 40px; }
+  h1 { font-size: 1.45rem; margin: 6px 0 2px; }
+  h2 { font-size: 1.05rem; margin: 22px 0 8px; color: var(--muted); font-weight: 600; }
+  .sub { color: var(--muted); margin: 0 0 14px; }
+  .card { background: var(--card); border-radius: 14px; padding: 14px; margin: 10px 0; }
+  button { font: inherit; color: inherit; border: 0; cursor: pointer; }
+  .btn { display: block; width: 100%; padding: 16px; border-radius: 14px; font-weight: 700;
+    font-size: 1.1rem; margin: 10px 0; background: var(--card); text-align: center; }
+  .btn.primary { background: var(--accent); color: #14213d; }
+  .btn small { display: block; font-weight: 500; font-size: .85rem; opacity: .8; margin-top: 2px; }
+  .btn:disabled { opacity: .4; }
+  .link { background: none; color: var(--muted); text-decoration: underline; padding: 8px; font-size: .9rem; }
+  .stats { display: flex; gap: 10px; }
+  .stat { flex: 1; background: var(--card); border-radius: 14px; padding: 12px; text-align: center; }
+  .stat b { display: block; font-size: 1.6rem; }
+  .stat span { color: var(--muted); font-size: .8rem; }
+  .topic { display: block; width: 100%; text-align: left; background: none; padding: 7px 0; }
+  .topic .row { display: flex; justify-content: space-between; font-size: .92rem; }
+  .topic .row span:last-child { color: var(--muted); }
+  .bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+  .bar i { display: block; height: 100%; border-radius: 4px; }
+  input { font: inherit; width: 100%; padding: 14px; border-radius: 12px; border: 2px solid var(--line);
+    background: var(--card); color: var(--ink); }
+
+  /* quiz */
+  .qtop { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: .9rem; }
+  .streak { color: var(--accent); font-weight: 700; }
+  .timer { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 10px 0 18px; }
+  .timer i { display: block; height: 100%; background: var(--accent); width: 100%; }
+  .topiclabel { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
+  .question { font-size: 1.3rem; font-weight: 700; margin: 6px 0 18px; min-height: 3.5em; }
+  .ans { display: block; width: 100%; text-align: left; padding: 16px; margin: 10px 0; border-radius: 14px;
+    background: var(--card); font-size: 1.05rem; border: 2px solid transparent; }
+  .ans.good { background: var(--good); }
+  .ans.bad { background: var(--bad); }
+  .ans.reveal { border-color: var(--good); }
+  .tf { display: flex; gap: 10px; } .tf .ans { text-align: center; font-weight: 700; }
+  .feedback { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: var(--card); color: var(--muted); }
+  .feedback b { color: var(--ink); }
+  .tapnext { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 14px; }
+  .missed { font-size: .95rem; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .missed:last-child { border: 0; }
+  .missed .right { color: var(--good); }
+  .big { font-size: 3rem; font-weight: 800; text-align: center; margin: 10px 0 0; }
+  .center { text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">Loading…</div>
+<script>
+"use strict";
+// ---------- settings ----------
+const BLITZ_SIZE = 30, FOCUS_SIZE = 15;
+const TIME_MC = 15000, TIME_TF = 8000;   // ms allowed per question
+const MASTERED = 2;                      // right this many times in a row = mastered
+const MAX_BOX = 3;
+const SALT = "rev-7c1e";                 // only deters casual editing of shared scores
+
+// ---------- helpers ----------
+const $app = document.getElementById("app");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pct = (n, d) => d ? Math.round(100 * n / d) : 0;
+const colourFor = p => p >= 80 ? "var(--good)" : p >= 40 ? "var(--accent)" : "var(--bad)";
+function hash(str) { let h = 2166136261; for (const ch of str) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return (h >>> 0).toString(36).toUpperCase().slice(-5); }
+
+const params = new URLSearchParams(location.search);
+const testId = params.get("t");
+let test, state, round;
+
+const storeKey = () => "rev." + testId;
+function load() { try { return JSON.parse(localStorage.getItem(storeKey())) || { q: {}, rounds: [] }; } catch { return { q: {}, rounds: [] }; } }
+function save() { localStorage.setItem(storeKey(), JSON.stringify(state)); }
+const qs = id => state.q[id] || (state.q[id] = { b: 0, s: 0, c: 0, w: 0 });
+const getName = () => localStorage.getItem("rev.name") || "";
+
+function mastery(filterTopic) {
+  const list = test.questions.filter(q => !filterTopic || q.t === filterTopic);
+  const seen = list.filter(q => state.q[q.id]?.s).length;
+  const mastered = list.filter(q => (state.q[q.id]?.b || 0) >= MASTERED).length;
+  return { total: list.length, seen, mastered, p: pct(mastered, list.length) };
+}
+const isWeak = q => { const s = state.q[q.id]; return s && s.s && s.b < MASTERED; };
+
+// ---------- start ----------
+async function start() {
+  if (!testId) return listTests();
+  try {
+    const r = await fetch("tests/" + encodeURIComponent(testId) + ".json", { cache: "no-cache" });
+    if (!r.ok) throw 0;
+    test = await r.json();
+  } catch { $app.innerHTML = `<h1>Test not found</h1><p class="sub">Check the link.</p>`; return; }
+  document.title = test.title;
+  state = load();
+  getName() ? home() : askName();
+}
+
+async function listTests() {
+  let tests = [];
+  try { tests = await (await fetch("tests/index.json", { cache: "no-cache" })).json(); } catch {}
+  $app.innerHTML = `<h1>Revision</h1><p class="sub">Pick a test</p>` +
+    tests.map(t => `<a class="btn" style="text-decoration:none" href="?t=${encodeURIComponent(t.id)}">${esc(t.title)}</a>`).join("");
+}
+
+function askName() {
+  $app.innerHTML = `<h1>${esc(test.title)}</h1><p class="sub">What's your name?</p>
+    <input id="nm" autocomplete="given-name" maxlength="20" placeholder="Your name">
+    <button class="btn primary" id="go">Start</button>`;
+  const nm = document.getElementById("nm"); nm.focus();
+  const go = () => { const v = nm.value.trim(); if (!v) return; localStorage.setItem("rev.name", v); home(); };
+  document.getElementById("go").onclick = go;
+  nm.onkeydown = e => { if (e.key === "Enter") go(); };
+}
+
+// ---------- home ----------
+function home() {
+  const m = mastery();
+  const weak = test.questions.filter(isWeak).length;
+  const unseen = m.total - m.seen;
+  const topics = Object.entries(test.topics).map(([k, label]) => {
+    const t = mastery(k);
+    const w = test.questions.filter(q => q.t === k && isWeak(q)).length;
+    return `<button class="topic" data-t="${k}">
+      <div class="row"><span>${esc(label)}</span><span>${t.seen ? t.p + "%" : "not tried"}${w ? " · " + w + " to fix" : ""}</span></div>
+      <div class="bar"><i style="width:${t.p}%;background:${colourFor(t.p)}"></i></div></button>`;
+  }).join("");
+
+  $app.innerHTML = `
+    <h1>${esc(test.title)}</h1>
+    <p class="sub">Hi ${esc(getName())} · ${m.total} questions</p>
+    <div class="stats">
+      <div class="stat"><b>${m.p}%</b><span>mastered</span></div>
+      <div class="stat"><b>${m.seen}/${m.total}</b><span>tried</span></div>
+      <div class="stat"><b>${weak}</b><span>to fix</span></div>
+    </div>
+    <button class="btn ${weak ? "" : "primary"}" id="blitz">⚡ Blitz<small>${BLITZ_SIZE} fast questions${unseen ? " · new ones first" : ""}</small></button>
+    <button class="btn ${weak ? "primary" : ""}" id="focus" ${weak ? "" : "disabled"}>🎯 Fix my weak spots<small>${weak ? weak + " questions you got wrong or haven't nailed yet" : "Do a Blitz first"}</small></button>
+    <h2>Topics <span style="font-weight:400;font-size:.85rem">(tap one to practise it)</span></h2>
+    <div class="card">${topics}</div>
+    <p class="center"><button class="link" id="share">Send my progress</button>
+      <button class="link" id="who">Not ${esc(getName())}?</button>
+      <button class="link" id="reset">Reset progress</button></p>`;
+
+  document.getElementById("blitz").onclick = () => begin("blitz");
+  document.getElementById("focus").onclick = () => begin("focus");
+  document.querySelectorAll(".topic").forEach(b => b.onclick = () => begin("topic", b.dataset.t));
+  document.getElementById("share").onclick = () => share(null);
+  document.getElementById("who").onclick = askName;
+  document.getElementById("reset").onclick = e => {
+    if (e.target.dataset.armed) { state = { q: {}, rounds: [] }; save(); home(); }
+    else { e.target.dataset.armed = 1; e.target.textContent = "Tap again to wipe all progress"; }
+  };
+}
+
+// ---------- choosing questions ----------
+function pick(mode, topic) {
+  const all = test.questions;
+  const seen = q => state.q[q.id]?.s || 0;
+  const box = q => state.q[q.id]?.b || 0;
+  const wrong = q => state.q[q.id]?.w || 0;
+  if (mode === "blitz") {
+    // least-seen first, random within that
+    return shuffle(all).sort((a, b) => seen(a) - seen(b)).slice(0, BLITZ_SIZE);
+  }
+  const pool = topic ? all.filter(q => q.t === topic) : all;
+  const weak = shuffle(pool.filter(isWeak)).sort((a, b) => box(a) - box(b) || wrong(b) - wrong(a));
+  const unseen = shuffle(pool.filter(q => !seen(q)));
+  const review = shuffle(pool.filter(q => seen(q) && !isWeak(q)));
+  return [...weak, ...unseen, ...review].slice(0, FOCUS_SIZE);
+}
+
+// ---------- quiz ----------
+function begin(mode, topic) {
+  const list = pick(mode, topic);
+  if (!list.length) return home();
+  round = { mode, topic, queue: list, i: 0, score: 0, streak: 0, best: 0, right: 0, answered: 0,
+            missed: [], times: [], before: mastery().mastered, retries: {} };
+  ask();
+}
+
+let timerRaf, deadline, locked;
+function ask() {
+  const r = round;
+  if (r.i >= r.queue.length) return finish();
+  const q = r.queue[r.i];
+  const limit = q.tf ? TIME_TF : TIME_MC;
+  const answers = q.tf ? ["True", "False"] : shuffle(q.a);
+  const correct = q.a[0];
+  locked = false;
+
+  $app.innerHTML = `
+    <div class="qtop"><span>${r.i + 1} / ${r.queue.length}</span>
+      <span class="streak">${r.streak >= 3 ? "🔥 " + r.streak : ""}</span><span>${r.score} pts</span></div>
+    <div class="timer"><i id="tm"></i></div>
+    <div class="topiclabel">${esc(test.topics[q.t] || "")}</div>
+    <div class="question">${esc(q.q)}</div>
+    <div class="${q.tf ? "tf" : ""}" id="answers">
+      ${answers.map(a => `<button class="ans" data-a="${esc(a)}">${esc(a)}</button>`).join("")}
+    </div><div id="fb"></div>`;
+
+  const started = performance.now();
+  deadline = started + limit;
+  const tm = document.getElementById("tm");
+  cancelAnimationFrame(timerRaf);
+  const tick = () => {
+    const left = deadline - performance.now();
+    tm.style.width = Math.max(0, 100 * left / limit) + "%";
+    if (left <= 0) return answer(q, null, correct, limit, limit);
+    timerRaf = requestAnimationFrame(tick);
+  };
+  timerRaf = requestAnimationFrame(tick);
+
+  document.querySelectorAll(".ans").forEach(b => b.onclick = () =>
+    answer(q, b.dataset.a, correct, performance.now() - started, limit));
+}
+
+function answer(q, chosen, correct, ms, limit) {
+  if (locked) return; locked = true;
+  cancelAnimationFrame(timerRaf);
+  const r = round, s = qs(q.id), ok = chosen === correct;
+  s.s++; r.answered++; r.times.push(ms);
+  document.querySelectorAll(".ans").forEach(b => {
+    if (b.dataset.a === chosen) b.classList.add(ok ? "good" : "bad");
+    else if (b.dataset.a === correct && !ok) b.classList.add("reveal");
+  });
+
+  if (ok) {
+    const quick = ms < limit * 0.6;
+    // right first time and quickly = already known; otherwise climb one step per correct answer
+    s.b = (s.s === 1 && quick) ? MASTERED : Math.min(MAX_BOX, s.b + 1);
+    s.c++;
+    r.right++; r.streak++; r.best = Math.max(r.best, r.streak);
+    r.score += 10 + Math.round(10 * Math.max(0, 1 - ms / limit));   // speed bonus
+    save();
+    r.i++; setTimeout(ask, 450);
+    return;
+  }
+  s.w++; s.b = 0; r.streak = 0; save();
+  if (navigator.vibrate) navigator.vibrate(120);
+  if (!r.missed.includes(q)) r.missed.push(q);
+  // in focus rounds, bring a missed question back a few questions later (up to twice)
+  if (r.mode !== "blitz" && (r.retries[q.id] || 0) < 2) {
+    r.retries[q.id] = (r.retries[q.id] || 0) + 1;
+    r.queue.splice(Math.min(r.queue.length, r.i + 4), 0, q);
+  }
+  document.getElementById("fb").innerHTML = `<div class="feedback">${chosen === null ? "<b>Out of time.</b> " : ""}
+    Answer: <b>${esc(correct)}</b>${q.x ? "<br>" + esc(q.x) : ""}</div><div class="tapnext">Tap anywhere to carry on</div>`;
+  const next = () => { document.removeEventListener("click", next, true); r.i++; ask(); };
+  setTimeout(() => document.addEventListener("click", next, true), 300);
+}
+
+// ---------- results ----------
+function finish() {
+  const r = round, m = mastery();
+  const acc = pct(r.right, r.answered);
+  const avg = r.times.length ? (r.times.reduce((a, b) => a + b, 0) / r.times.length / 1000).toFixed(1) : 0;
+  state.rounds.push({ d: Date.now(), mode: r.mode, topic: r.topic || null, right: r.right, n: r.answered, score: r.score });
+  save();
+  const label = r.mode === "blitz" ? "Blitz" : r.topic ? test.topics[r.topic] : "Weak spots";
+  const verdict = acc >= 90 ? "Excellent." : acc >= 70 ? "Good going." : acc >= 50 ? "Getting there." : "Plenty to work on, which is what this is for.";
+
+  $app.innerHTML = `
+    <h1>${esc(label)} done</h1><p class="sub">${verdict}</p>
+    <div class="big">${r.right}/${r.answered}</div>
+    <p class="center sub">${acc}% · ${r.score} pts · best streak ${r.best} · ${avg}s per question</p>
+    <div class="stats">
+      <div class="stat"><b>${m.p}%</b><span>mastered overall</span></div>
+      <div class="stat"><b>${m.mastered - r.before >= 0 ? "+" : ""}${m.mastered - r.before}</b><span>newly mastered</span></div>
+    </div>
+    <button class="btn primary" id="focus">🎯 Fix my weak spots</button>
+    <button class="btn" id="blitz">⚡ Another Blitz</button>
+    <button class="btn" id="share">📤 Send result on WhatsApp</button>
+    <button class="btn" id="home">Home</button>
+    ${r.missed.length ? `<h2>Got wrong this round</h2><div class="card">` + r.missed.map(q =>
+      `<div class="missed">${esc(q.q)}<br><span class="right">✓ ${esc(q.a[0])}</span></div>`).join("") + `</div>` : ""}`;
+
+  document.getElementById("focus").onclick = () => begin("focus");
+  document.getElementById("blitz").onclick = () => begin("blitz");
+  document.getElementById("share").onclick = () => share(r);
+  document.getElementById("home").onclick = home;
+  window.scrollTo(0, 0);
+}
+
+// ---------- sharing ----------
+function share(r) {
+  const m = mastery(), name = getName();
+  const today = new Date().toISOString().slice(0, 10);
+  const line = r ? `${r.mode === "blitz" ? "Blitz" : "Practice"}: ${r.right}/${r.answered} (${pct(r.right, r.answered)}%), ${r.score} pts` : "Progress check";
+  const core = [name, test.id, today, line, m.mastered, m.total].join("|");
+  const text = `📚 ${name}: ${test.title}\n${line}\nMastered: ${m.mastered}/${m.total} (${m.p}%) · tried ${m.seen}\n${today} · code ${hash(SALT + core)}`;
+  location.href = "https://wa.me/?text=" + encodeURIComponent(text);
+}
+
+start();
+</script>
+</body>
+</html>

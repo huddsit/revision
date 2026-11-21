@@ -1,0 +1,5 @@
+# Publish only the site and notes; source material stays local
+/*
+!/docs/
+!/CLAUDE.md
+!/.gitignore
