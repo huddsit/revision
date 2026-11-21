@@ -57,6 +57,14 @@
   .missed { font-size: .95rem; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .missed:last-child { border: 0; }
   .missed .right { color: var(--good); }
+  .fig { background: #fff; border-radius: 14px; padding: 8px; margin: 0 0 12px; }
+  .fig svg { display: block; width: 100%; height: auto; max-height: 36vh; }
+  .fig.small svg { max-height: 26vh; }
+  .fig.study svg { max-height: none; }
+  .question.withfig { min-height: 0; font-size: 1.15rem; margin-bottom: 8px; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid4 .ans { margin: 0; text-align: center; font-weight: 800; font-size: 1.3rem; padding: 14px; }
+  .studyname { font-weight: 700; margin: 18px 0 6px; }
   .big { font-size: 3rem; font-weight: 800; text-align: center; margin: 10px 0 0; }
   .center { text-align: center; }
 </style>
@@ -67,7 +75,7 @@
 "use strict";
 // ---------- settings ----------
 const BLITZ_SIZE = 30, FOCUS_SIZE = 15;
-const TIME_MC = 15000, TIME_TF = 8000;   // ms allowed per question
+const TIME_MC = 15000, TIME_TF = 8000, TIME_IMG = 20000;   // ms allowed per question
 const MASTERED = 2;                      // right this many times in a row = mastered
 const MAX_BOX = 3;
 const SALT = "rev-7c1e";                 // only deters casual editing of shared scores
@@ -98,6 +106,66 @@ function mastery(filterTopic) {
 }
 const isWeak = q => { const s = state.q[q.id]; return s && s.s && s.b < MASTERED; };
 
+// ---------- diagrams ----------
+// test.diagrams: { svgName: { t, title, parts: {partId: "Name"}, name?, find?, modes? } }
+//   -> per part: "name" question (pointer + "?"), "find" question (letters A-D on parts)
+// test.galleries: [{ t, q, items: { svgName: "Answer" } }] -> "what is this picture?" questions
+// Any question may also carry img (+ mark) directly.
+const SVG = {};
+const lowerFirst = s => /^[A-Z][a-z]/.test(s) ? s[0].toLowerCase() + s.slice(1) : s;
+function buildDiagramQuestions() {
+  for (const [img, d] of Object.entries(test.diagrams || {})) {
+    const ids = Object.keys(d.parts), modes = d.modes || ["name", "find"];
+    for (const p of ids) {
+      const name = d.parts[p];
+      const others = shuffle(ids.filter(x => x !== p)).slice(0, 3).map(x => d.parts[x]);
+      if (modes.includes("name")) test.questions.push({ id: `d.${img}.${p}`, t: d.t, img, mark: p,
+        q: d.name || "What is the part labelled ? called?", a: [name, ...others] });
+      if (modes.includes("find") && ids.length >= 3) test.questions.push({ id: `f.${img}.${p}`, t: d.t, img, find: p, pool: ids,
+        q: (d.find || "Which label points to the {p}?").replace("{p}", lowerFirst(name)), a: [name] });
+    }
+  }
+  (test.galleries || []).forEach((g, gi) => {
+    const items = Object.entries(g.items);
+    for (const [img, label] of items) {
+      const others = shuffle(items.filter(([i]) => i !== img).map(([, l]) => l)).slice(0, 3);
+      test.questions.push({ id: `g${gi}.${img}`, t: g.t, img, q: g.q, a: [label, ...others] });
+    }
+  });
+}
+async function loadSvgs() {
+  const names = new Set([...test.questions.map(q => q.img), ...Object.keys(test.diagrams || {})].filter(Boolean));
+  await Promise.all([...names].map(async n => {
+    try { SVG[n] = await (await fetch("diagrams/" + n + ".svg")).text(); } catch { SVG[n] = ""; }
+  }));
+}
+const NS = "http://www.w3.org/2000/svg";
+function el(svg, tag, attrs, text) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text != null) e.textContent = text;
+  svg.appendChild(e); return e;
+}
+// marks: { partId: "?" | "A" | "1" ... }
+function figure(img, marks = {}, cls = "") {
+  const div = document.createElement("div");
+  div.className = "fig " + cls;
+  div.innerHTML = SVG[img] || "";
+  const svg = div.querySelector("svg");
+  if (!svg) return div;
+  for (const [part, text] of Object.entries(marks)) {
+    const a = svg.querySelector(`[data-part="${part}"]`);
+    if (!a) continue;
+    const [cx, cy, lx, ly] = ["cx", "cy", "data-lx", "data-ly"].map(k => a.getAttribute(k));
+    el(svg, "line", { x1: lx, y1: ly, x2: cx, y2: cy, stroke: "#fff", "stroke-width": 6, "stroke-linecap": "round" });
+    el(svg, "line", { x1: lx, y1: ly, x2: cx, y2: cy, stroke: "#e8590c", "stroke-width": 2.5 });
+    el(svg, "circle", { cx, cy, r: 4.5, fill: "#e8590c", stroke: "#fff", "stroke-width": 1.5 });
+    el(svg, "circle", { cx: lx, cy: ly, r: 16, fill: "#fca311", stroke: "#14213d", "stroke-width": 2, "data-bubble": text });
+    el(svg, "text", { x: lx, y: +ly + 6.5, "text-anchor": "middle", "font-size": 18, "font-weight": 800, fill: "#14213d" }, text);
+  }
+  return div;
+}
+
 // ---------- start ----------
 async function start() {
   if (!testId) return listTests();
@@ -107,6 +175,8 @@ async function start() {
     test = await r.json();
   } catch { $app.innerHTML = `<h1>Test not found</h1><p class="sub">Check the link.</p>`; return; }
   document.title = test.title;
+  buildDiagramQuestions();
+  await loadSvgs();
   state = load();
   getName() ? home() : askName();
 }
@@ -151,6 +221,7 @@ function home() {
     </div>
     <button class="btn ${weak ? "" : "primary"}" id="blitz">⚡ Blitz<small>${BLITZ_SIZE} fast questions${unseen ? " · new ones first" : ""}</small></button>
     <button class="btn ${weak ? "primary" : ""}" id="focus" ${weak ? "" : "disabled"}>🎯 Fix my weak spots<small>${weak ? weak + " questions you got wrong or haven't nailed yet" : "Do a Blitz first"}</small></button>
+    ${test.diagrams ? `<button class="btn" id="study">📖 Study the diagrams<small>Every diagram, fully labelled</small></button>` : ""}
     <h2>Topics <span style="font-weight:400;font-size:.85rem">(tap one to practise it)</span></h2>
     <div class="card">${topics}</div>
     <p class="center"><button class="link" id="share">Send my progress</button>
@@ -160,12 +231,38 @@ function home() {
   document.getElementById("blitz").onclick = () => begin("blitz");
   document.getElementById("focus").onclick = () => begin("focus");
   document.querySelectorAll(".topic").forEach(b => b.onclick = () => begin("topic", b.dataset.t));
+  if (test.diagrams) document.getElementById("study").onclick = study;
   document.getElementById("share").onclick = () => share(null);
   document.getElementById("who").onclick = askName;
   document.getElementById("reset").onclick = e => {
     if (e.target.dataset.armed) { state = { q: {}, rounds: [] }; save(); home(); }
     else { e.target.dataset.armed = 1; e.target.textContent = "Tap again to wipe all progress"; }
   };
+}
+
+// ---------- study page ----------
+function study() {
+  $app.innerHTML = `<h1>Diagrams</h1><p class="sub">Cover the key and try to name each number.</p><div id="list"></div>
+    <button class="btn primary" id="back">Back</button>`;
+  const list = document.getElementById("list");
+  for (const [img, d] of Object.entries(test.diagrams)) {
+    const parts = Object.entries(d.parts), marks = {};
+    parts.forEach(([p], i) => marks[p] = String(i + 1));
+    const h = document.createElement("div"); h.className = "studyname"; h.textContent = d.title || test.topics[d.t];
+    const key = document.createElement("div"); key.className = "card";
+    key.innerHTML = parts.map(([, n], i) => `<b>${i + 1}</b> ${esc(n)}`).join("<br>");
+    list.append(h, figure(img, marks, "study"), key);
+  }
+  (test.galleries || []).forEach(g => {
+    const h = document.createElement("div"); h.className = "studyname"; h.textContent = g.q;
+    list.append(h);
+    for (const [img, label] of Object.entries(g.items)) {
+      const cap = document.createElement("p"); cap.className = "sub"; cap.style.margin = "-6px 0 14px"; cap.textContent = label;
+      list.append(figure(img, {}, "small"), cap);
+    }
+  });
+  document.getElementById("back").onclick = home;
+  window.scrollTo(0, 0);
 }
 
 // ---------- choosing questions ----------
@@ -199,9 +296,18 @@ function ask() {
   const r = round;
   if (r.i >= r.queue.length) return finish();
   const q = r.queue[r.i];
-  const limit = q.tf ? TIME_TF : TIME_MC;
-  const answers = q.tf ? ["True", "False"] : shuffle(q.a);
-  const correct = q.a[0];
+  const limit = q.tf ? TIME_TF : q.img ? TIME_IMG : TIME_MC;
+  let answers, correct, shown, marks = {};
+  if (q.find) {          // letters on up to 4 parts; answer is a letter
+    const parts = shuffle([q.find, ...shuffle(q.pool.filter(p => p !== q.find)).slice(0, 3)]);
+    parts.forEach((p, i) => marks[p] = "ABCD"[i]);
+    answers = parts.map((p, i) => "ABCD"[i]);
+    correct = marks[q.find]; shown = `${correct} (${q.a[0]})`;
+  } else {
+    if (q.mark) marks[q.mark] = "?";
+    answers = q.tf ? ["True", "False"] : shuffle(q.a);
+    correct = shown = q.a[0];
+  }
   locked = false;
 
   $app.innerHTML = `
@@ -209,10 +315,12 @@ function ask() {
       <span class="streak">${r.streak >= 3 ? "🔥 " + r.streak : ""}</span><span>${r.score} pts</span></div>
     <div class="timer"><i id="tm"></i></div>
     <div class="topiclabel">${esc(test.topics[q.t] || "")}</div>
-    <div class="question">${esc(q.q)}</div>
-    <div class="${q.tf ? "tf" : ""}" id="answers">
+    ${q.img ? `<div id="figslot"></div>` : ""}
+    <div class="question ${q.img ? "withfig" : ""}">${esc(q.q)}</div>
+    <div class="${q.tf ? "tf" : q.find ? "grid4" : ""}" id="answers">
       ${answers.map(a => `<button class="ans" data-a="${esc(a)}">${esc(a)}</button>`).join("")}
     </div><div id="fb"></div>`;
+  if (q.img) document.getElementById("figslot").replaceWith(figure(q.img, marks));
 
   const started = performance.now();
   deadline = started + limit;
@@ -221,16 +329,16 @@ function ask() {
   const tick = () => {
     const left = deadline - performance.now();
     tm.style.width = Math.max(0, 100 * left / limit) + "%";
-    if (left <= 0) return answer(q, null, correct, limit, limit);
+    if (left <= 0) return answer(q, null, correct, limit, limit, shown);
     timerRaf = requestAnimationFrame(tick);
   };
   timerRaf = requestAnimationFrame(tick);
 
   document.querySelectorAll(".ans").forEach(b => b.onclick = () =>
-    answer(q, b.dataset.a, correct, performance.now() - started, limit));
+    answer(q, b.dataset.a, correct, performance.now() - started, limit, shown));
 }
 
-function answer(q, chosen, correct, ms, limit) {
+function answer(q, chosen, correct, ms, limit, shown) {
   if (locked) return; locked = true;
   cancelAnimationFrame(timerRaf);
   const r = round, s = qs(q.id), ok = chosen === correct;
@@ -259,8 +367,10 @@ function answer(q, chosen, correct, ms, limit) {
     r.retries[q.id] = (r.retries[q.id] || 0) + 1;
     r.queue.splice(Math.min(r.queue.length, r.i + 4), 0, q);
   }
+  const bubble = document.querySelector(`[data-bubble="${correct}"]`);
+  if (q.find && bubble) bubble.setAttribute("fill", "#2bb673");
   document.getElementById("fb").innerHTML = `<div class="feedback">${chosen === null ? "<b>Out of time.</b> " : ""}
-    Answer: <b>${esc(correct)}</b>${q.x ? "<br>" + esc(q.x) : ""}</div><div class="tapnext">Tap anywhere to carry on</div>`;
+    Answer: <b>${esc(shown)}</b>${q.x ? "<br>" + esc(q.x) : ""}</div><div class="tapnext">Tap anywhere to carry on</div>`;
   const next = () => { document.removeEventListener("click", next, true); r.i++; ask(); };
   setTimeout(() => document.addEventListener("click", next, true), 300);
 }
@@ -287,8 +397,12 @@ function finish() {
     <button class="btn" id="blitz">⚡ Another Blitz</button>
     <button class="btn" id="share">📤 Send result on WhatsApp</button>
     <button class="btn" id="home">Home</button>
-    ${r.missed.length ? `<h2>Got wrong this round</h2><div class="card">` + r.missed.map(q =>
-      `<div class="missed">${esc(q.q)}<br><span class="right">✓ ${esc(q.a[0])}</span></div>`).join("") + `</div>` : ""}`;
+    ${r.missed.length ? `<h2>Got wrong this round</h2><div class="card">` + r.missed.map((q, i) =>
+      `<div class="missed">${q.img ? `<div data-fig="${i}"></div>` : ""}${esc(q.q)}<br><span class="right">✓ ${esc(q.a[0])}</span></div>`).join("") + `</div>` : ""}`;
+  document.querySelectorAll("[data-fig]").forEach(slot => {
+    const q = r.missed[slot.dataset.fig], part = q.mark || q.find;
+    slot.replaceWith(figure(q.img, part ? { [part]: "✓" } : {}, "small"));
+  });
 
   document.getElementById("focus").onclick = () => begin("focus");
   document.getElementById("blitz").onclick = () => begin("blitz");

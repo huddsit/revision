@@ -16,6 +16,196 @@
     "diffusion": "Diffusion",
     "separation": "Separation techniques"
   },
+  "diagrams": {
+    "microscope": {
+      "t": "microscope",
+      "title": "Parts of a microscope",
+      "parts": {
+        "eyepiece": "Eyepiece lens",
+        "bodytube": "Body tube",
+        "objective": "Objective lenses",
+        "stage": "Stage",
+        "mirror": "Mirror",
+        "rough": "Rough focusing knob",
+        "fine": "Fine focusing knob",
+        "handle": "Handle"
+      }
+    },
+    "animal-cell": {
+      "t": "organelles",
+      "title": "Animal cell",
+      "parts": {
+        "nucleus": "Nucleus",
+        "mitochondria": "Mitochondria",
+        "cytoplasm": "Cytoplasm",
+        "ribosome": "Ribosome",
+        "membrane": "Cell membrane"
+      },
+      "name": "Animal cell: what is the part labelled ? called?",
+      "find": "Animal cell: which label points to the {p}?"
+    },
+    "plant-cell": {
+      "t": "organelles",
+      "title": "Plant cell",
+      "parts": {
+        "cellwall": "Cell wall",
+        "membrane": "Cell membrane",
+        "nucleus": "Nucleus",
+        "cytoplasm": "Cytoplasm",
+        "vacuole": "Permanent vacuole",
+        "chloroplast": "Chloroplast",
+        "mitochondria": "Mitochondria",
+        "ribosome": "Ribosome"
+      },
+      "name": "Plant cell: what is the part labelled ? called?",
+      "find": "Plant cell: which label points to the {p}?"
+    },
+    "bacterium": {
+      "t": "unicellular",
+      "title": "Bacterium",
+      "parts": {
+        "pili": "Pili",
+        "cellwall": "Cell wall",
+        "membrane": "Cell membrane",
+        "cytoplasm": "Cytoplasm",
+        "dna": "Circular DNA",
+        "plasmid": "Plasmid",
+        "ribosome": "Ribosome",
+        "flagellum": "Flagellum"
+      },
+      "name": "Bacterium: what is the part labelled ? called?",
+      "find": "Bacterium: which label points to the {p}?"
+    },
+    "changes": {
+      "t": "changes",
+      "title": "Changes of state",
+      "parts": {
+        "melting": "Melting",
+        "boiling": "Boiling (evaporating)",
+        "freezing": "Freezing",
+        "condensing": "Condensing"
+      },
+      "name": "What is the change of state labelled ? called?",
+      "find": "Which arrow shows {p}?"
+    },
+    "dissolving": {
+      "t": "solutions",
+      "title": "Dissolving",
+      "parts": {
+        "solute": "Solute",
+        "solvent": "Solvent",
+        "solution": "Solution"
+      },
+      "find": "Which label shows the {p}?"
+    },
+    "distillation": {
+      "t": "separation",
+      "title": "Simple distillation",
+      "parts": {
+        "thermometer": "Thermometer",
+        "flask": "Distillation flask",
+        "saltwater": "Salt water",
+        "heat": "Heat",
+        "condenser": "Condenser",
+        "waterin": "Cooling water in",
+        "waterout": "Cooling water out",
+        "distillate": "Distillate (pure water)"
+      },
+      "name": "Distillation: what is the part labelled ? called?",
+      "find": "Distillation: which label shows the {p}?"
+    },
+    "filtration": {
+      "t": "separation",
+      "title": "Filtration",
+      "parts": {
+        "filterpaper": "Filter paper",
+        "mixture": "Mixture",
+        "residue": "Residue",
+        "funnel": "Funnel",
+        "flask": "Conical flask",
+        "filtrate": "Filtrate"
+      },
+      "name": "Filtration: what is the part labelled ? called?",
+      "find": "Filtration: which label shows the {p}?"
+    },
+    "evaporation": {
+      "t": "separation",
+      "title": "Evaporation",
+      "parts": {
+        "basin": "Evaporating basin",
+        "solution": "Solution",
+        "steam": "Water vapour",
+        "heat": "Heat"
+      },
+      "name": "Evaporation: what is the part labelled ? called?",
+      "find": "Evaporation: which label shows the {p}?"
+    },
+    "chromatography": {
+      "t": "separation",
+      "title": "Chromatography",
+      "parts": {
+        "front": "Solvent front",
+        "pencil": "Pencil line",
+        "solvent": "Solvent",
+        "paper": "Chromatography paper"
+      },
+      "name": "Chromatography: what is the part labelled ? called?",
+      "modes": [
+        "name"
+      ]
+    }
+  },
+  "galleries": [
+    {
+      "t": "specialised",
+      "q": "Which specialised cell is this?",
+      "items": {
+        "cell-egg": "Ovum (egg) cell",
+        "cell-sperm": "Sperm cell",
+        "cell-rbc": "Red blood cell",
+        "cell-nerve": "Nerve cell",
+        "cell-muscle": "Muscle cell",
+        "cell-ciliated": "Ciliated epithelial cell",
+        "cell-roothair": "Root hair cell",
+        "cell-palisade": "Palisade cell"
+      }
+    },
+    {
+      "t": "states",
+      "q": "Which state of matter does this diagram show?",
+      "items": {
+        "particles-solid": "Solid",
+        "particles-liquid": "Liquid",
+        "particles-gas": "Gas"
+      }
+    },
+    {
+      "t": "plantanimal",
+      "q": "Is this a plant cell or an animal cell?",
+      "items": {
+        "plant-cell": "Plant cell",
+        "animal-cell": "Animal cell"
+      }
+    },
+    {
+      "t": "solutions",
+      "q": "Is this a pure substance or a mixture?",
+      "items": {
+        "pure": "Pure substance",
+        "mixture": "Impure substance (mixture)"
+      }
+    },
+    {
+      "t": "separation",
+      "q": "Which separation technique is shown?",
+      "items": {
+        "distillation": "Simple distillation",
+        "filtration": "Filtration",
+        "evaporation": "Evaporation",
+        "chromatography": "Chromatography"
+      }
+    }
+  ],
   "questions": [
     {"id":"o1","t":"organelles","q":"Which part of the cell controls the cell and contains the DNA?","a":["Nucleus","Cytoplasm","Cell membrane","Ribosome"]},
     {"id":"o2","t":"organelles","q":"What does the nucleus do?","a":["Controls the cell and contains the DNA","Releases energy through respiration","Controls what enters and leaves the cell","Carries out photosynthesis"]},
@@ -34,7 +224,6 @@
     {"id":"o15","t":"organelles","q":"The cell membrane provides structure for the cell.","a":["False","True"],"tf":true,"x":"The cell WALL provides structure. The membrane controls what enters and leaves."},
     {"id":"o16","t":"organelles","q":"Ribosomes are where energy is released.","a":["False","True"],"tf":true,"x":"Ribosomes make proteins. Energy is released in the mitochondria."},
     {"id":"o17","t":"organelles","q":"What is the vacuole filled with?","a":["Cell sap","Chlorophyll","Cytoplasm","DNA"]},
-
     {"id":"p1","t":"plantanimal","q":"Which of these is found ONLY in plant cells?","a":["Chloroplast","Nucleus","Mitochondria","Cell membrane"]},
     {"id":"p2","t":"plantanimal","q":"Which of these is found ONLY in plant cells?","a":["Cell wall","Ribosomes","Cytoplasm","Cell membrane"]},
     {"id":"p3","t":"plantanimal","q":"Which of these is found ONLY in plant cells?","a":["Vacuole (permanent)","Nucleus","Ribosomes","Mitochondria"]},
@@ -43,7 +232,6 @@
     {"id":"p6","t":"plantanimal","q":"Plant cells have mitochondria.","a":["True","False"],"tf":true,"x":"Plant cells respire too, so they need mitochondria."},
     {"id":"p7","t":"plantanimal","q":"How many of these are plant-only: chloroplast, vacuole, cell wall, ribosome?","a":["3","2","4","1"],"x":"Chloroplast, vacuole and cell wall are plant-only. Ribosomes are in both."},
     {"id":"p8","t":"plantanimal","q":"Both plant and animal cells have a cell membrane.","a":["True","False"],"tf":true},
-
     {"id":"u1","t":"unicellular","q":"What is a unicellular organism?","a":["An organism made of one cell","An organism with no cells","A cell without a membrane","An organism made of many specialised cells"]},
     {"id":"u2","t":"unicellular","q":"How many life processes can a unicellular organism carry out within its one cell?","a":["7","3","5","1"]},
     {"id":"u3","t":"unicellular","q":"Which of these is a unicellular organism?","a":["Bacteria","Oak tree","Earthworm","Mushroom"]},
@@ -55,7 +243,6 @@
     {"id":"u9","t":"unicellular","q":"Which part helps a bacterium move (the long tail)?","a":["Flagellum","Pili","Plasmid","Cell wall"]},
     {"id":"u10","t":"unicellular","q":"Bacteria are which type of cell?","a":["Prokaryotic","Eukaryotic","Specialised","Plant"]},
     {"id":"u11","t":"unicellular","q":"Which list contains only unicellular organisms?","a":["Yeast, amoeba, euglena","Yeast, fern, amoeba","Bacteria, moss, euglena","Amoeba, jellyfish, yeast"]},
-
     {"id":"m1","t":"microscope","q":"What are microscopes used for?","a":["Magnifying very small objects using lenses","Measuring the mass of cells","Heating specimens","Separating mixtures"]},
     {"id":"m2","t":"microscope","q":"Why must a specimen be very thin?","a":["To let light pass through it","So it dries quickly","So it doesn't fall off the slide","To make it heavier"]},
     {"id":"m3","t":"microscope","q":"What is a specimen stained with in the knowledge organiser?","a":["Iodine","Water","Salt","Ink"]},
@@ -70,7 +257,6 @@
     {"id":"m12","t":"microscope","q":"What is resolution?","a":["The clarity of an image","How much bigger the image appears","The size of the specimen","The number of lenses"]},
     {"id":"m13","t":"microscope","q":"Resolution means how much bigger an image appears.","a":["False","True"],"tf":true,"x":"That's magnification. Resolution is the clarity of the image."},
     {"id":"m14","t":"microscope","q":"Which part do you hold when carrying the microscope?","a":["Handle (arm)","Stage","Body tube","Eyepiece"]},
-
     {"id":"s1","t":"specialised","q":"What is a specialised cell?","a":["A cell that is differentiated and adapted for its function","Any cell with a nucleus","A cell that can do all 7 life processes","A cell without organelles"]},
     {"id":"s2","t":"specialised","q":"What is an adaptation?","a":["A feature that helps a cell to do its job","A cell dividing in two","A type of organelle","A change of state"]},
     {"id":"s3","t":"specialised","q":"Which cell fuses with a sperm at fertilisation?","a":["Ovum (egg) cell","Red blood cell","Ciliated epithelial cell","Palisade cell"]},
@@ -106,7 +292,6 @@
     {"id":"s33","t":"specialised","q":"Which cell has branched endings and a myelin sheath?","a":["Nerve cell","Muscle cell","Sperm cell","Root hair cell"]},
     {"id":"s34","t":"specialised","q":"Which is a specialised PLANT cell?","a":["Root hair cell","Red blood cell","Nerve cell","Sperm cell"]},
     {"id":"s35","t":"specialised","q":"Root hair cells contain lots of chloroplasts.","a":["False","True"],"tf":true,"x":"No chloroplasts: there's no light underground."},
-
     {"id":"k1","t":"keywords","q":"What does 'synthesis' mean?","a":["Produces something","Breaks something down","Moves something","Separates something"]},
     {"id":"k2","t":"keywords","q":"What is chlorophyll?","a":["Green pigment in chloroplasts that absorbs light energy","A liquid that dissolves a solid","The jelly inside a cell","A sheath around nerve cells"]},
     {"id":"k3","t":"keywords","q":"What is a eukaryotic cell?","a":["A larger, more complex cell, with a nucleus","A smaller, less complex cell, without a nucleus","A cell without DNA","A dead cell"]},
@@ -118,7 +303,6 @@
     {"id":"k9","t":"keywords","q":"What is volume?","a":["The amount of space an object occupies","The mass of an object","The mass per unit volume","How loud something is"]},
     {"id":"k10","t":"keywords","q":"What does 'compress' mean?","a":["To squash under force","To heat up","To dissolve","To spread out"]},
     {"id":"k11","t":"keywords","q":"Prokaryotic cells have a nucleus.","a":["False","True"],"tf":true},
-
     {"id":"st1","t":"states","q":"What are the three states of matter?","a":["Solid, liquid, gas","Solid, liquid, plasma","Hot, warm, cold","Metal, water, air"]},
     {"id":"st2","t":"states","q":"Particles that vibrate around a fixed position are in a...","a":["Solid","Liquid","Gas","Solution"]},
     {"id":"st3","t":"states","q":"Particles that are close together and arranged in a regular way are in a...","a":["Solid","Liquid","Gas","Mixture"]},
@@ -135,7 +319,6 @@
     {"id":"st14","t":"states","q":"Particles in a solid don't move at all.","a":["False","True"],"tf":true,"x":"They vibrate around a fixed position."},
     {"id":"st15","t":"states","q":"Liquids have a fixed volume.","a":["True","False"],"tf":true},
     {"id":"st16","t":"states","q":"What decides the properties of solids, liquids and gases?","a":["The arrangement of their particles","Their colour","Their temperature only","Their mass"]},
-
     {"id":"c1","t":"changes","q":"Solid → liquid is called...","a":["Melting","Freezing","Evaporating","Condensing"]},
     {"id":"c2","t":"changes","q":"Liquid → solid is called...","a":["Freezing","Melting","Condensing","Dissolving"]},
     {"id":"c3","t":"changes","q":"Liquid → gas is called...","a":["Evaporating (boiling)","Condensing","Melting","Freezing"]},
@@ -151,7 +334,6 @@
     {"id":"c13","t":"changes","q":"Water vapour forming droplets on a cold window is...","a":["Condensing","Evaporating","Melting","Diffusion"]},
     {"id":"c14","t":"changes","q":"An ice cube turning to water is...","a":["Melting","Freezing","Condensing","Dissolving"]},
     {"id":"c15","t":"changes","q":"Melting happens when particles gain energy.","a":["True","False"],"tf":true},
-
     {"id":"d1","t":"solutions","q":"What is a pure substance?","a":["A single substance, not mixed with any other","More than one substance mixed together","A substance that dissolves","Any liquid"]},
     {"id":"d2","t":"solutions","q":"What is an impure substance?","a":["More than one substance mixed together","A single substance","A substance that won't dissolve","Distilled water"]},
     {"id":"d3","t":"solutions","q":"An impure substance is also called a...","a":["Mixture","Compound","Element","Solute"]},
@@ -166,7 +348,6 @@
     {"id":"d12","t":"solutions","q":"In salty water, what is the water?","a":["Solvent","Solute","Solution","Mixture of solutes"]},
     {"id":"d13","t":"solutions","q":"Salty water as a whole is the...","a":["Solution","Solute","Solvent","Pure substance"]},
     {"id":"d14","t":"solutions","q":"Sand in water does not dissolve. Sand is...","a":["Insoluble","Soluble","A solvent","A solution"]},
-
     {"id":"f1","t":"diffusion","q":"What is diffusion?","a":["Movement of particles from high concentration to low concentration","Movement of particles from low concentration to high concentration","A liquid turning into a gas","A solid dissolving"]},
     {"id":"f2","t":"diffusion","q":"Particles diffuse from an area of ___ concentration to ___ concentration.","a":["High → low","Low → high","Low → low","High → high"]},
     {"id":"f3","t":"diffusion","q":"When does diffusion stop?","a":["When particles are evenly distributed","When it gets dark","When the liquid freezes","Never"]},
@@ -174,7 +355,6 @@
     {"id":"f5","t":"diffusion","q":"Smelling perfume from across a room is an example of...","a":["Diffusion","Condensing","Filtration","Melting"]},
     {"id":"f6","t":"diffusion","q":"Diffusion moves particles from low to high concentration.","a":["False","True"],"tf":true,"x":"High → low."},
     {"id":"f7","t":"diffusion","q":"A drop of ink spreading through water on its own is...","a":["Diffusion","Evaporation","Chromatography","Freezing"]},
-
     {"id":"x1","t":"separation","q":"How do you separate an insoluble solid (like sand) from a liquid?","a":["Filtration","Evaporation","Chromatography","Distillation of dyes"]},
     {"id":"x2","t":"separation","q":"How do you get a soluble solid (like salt) back out of a solvent?","a":["Evaporation","Filtration","Chromatography","Magnet"]},
     {"id":"x3","t":"separation","q":"How do you separate two liquids with different boiling points?","a":["Simple distillation","Filtration","Chromatography","Evaporation"]},
@@ -186,6 +366,42 @@
     {"id":"x9","t":"separation","q":"Chromatography separates...","a":["Mixtures of different colours in dyes or inks","Sand from water","Salt from water","Oil from rock"]},
     {"id":"x10","t":"separation","q":"Simple distillation works because liquids have different...","a":["Boiling points","Colours","Densities only","Shapes"]},
     {"id":"x11","t":"separation","q":"Filtration can separate salt from salt water.","a":["False","True"],"tf":true,"x":"Dissolved salt passes through the filter paper. Use evaporation."},
-    {"id":"x12","t":"separation","q":"Getting salt crystals from sea water: which technique?","a":["Evaporation","Filtration","Chromatography","Diffusion"]}
+    {"id":"x12","t":"separation","q":"Getting salt crystals from sea water: which technique?","a":["Evaporation","Filtration","Chromatography","Diffusion"]},
+    {"id":"i1","t":"plantanimal","img":"plant-cell","q":"How can you tell this is a plant cell?","a":["It has a cell wall, chloroplasts and a vacuole","It has a nucleus","It has mitochondria","It has a cell membrane"]},
+    {"id":"i2","t":"specialised","img":"plant-cell","mark":"chloroplast","q":"Root hair cells do NOT have the part labelled ?. Why?","a":["There is no light underground","They have no cell wall","They need more mitochondria","They are animal cells"]},
+    {"id":"i3","t":"unicellular","img":"bacterium","q":"This cell has no nucleus. What type of cell is it?","a":["Prokaryotic","Eukaryotic","Specialised","Plant"]},
+    {"id":"i4","t":"specialised","img":"cell-sperm","mark":"tail","q":"What is the part labelled ? for?","a":["Swimming to the egg cell","Digesting the egg cell membrane","Carrying oxygen","Storing fat"]},
+    {"id":"i5","t":"specialised","img":"cell-sperm","mark":"midpiece","q":"The part labelled ? is packed with mitochondria. Why?","a":["To release energy for swimming","To make the cell heavier","To store DNA","To absorb light"]},
+    {"id":"i6","t":"specialised","img":"cell-sperm","mark":"head","q":"What does the part labelled ? contain to get into the egg?","a":["Enzymes to digest the egg cell membrane","Haemoglobin","Chloroplasts","Cilia"]},
+    {"id":"i7","t":"specialised","img":"cell-nerve","mark":"myelin","q":"What is the part labelled ? called?","a":["Myelin sheath","Cell wall","Cilia","Haemoglobin"]},
+    {"id":"i8","t":"specialised","img":"cell-nerve","mark":"myelin","q":"What does the part labelled ? do?","a":["Insulates the cell to speed up impulses","Absorbs water","Carries oxygen","Makes proteins"]},
+    {"id":"i9","t":"specialised","img":"cell-nerve","mark":"endings","q":"Why does this cell have branched endings?","a":["To connect with other nerve cells","To swim","To absorb minerals","To store fat"]},
+    {"id":"i10","t":"specialised","img":"cell-ciliated","mark":"cilia","q":"What are the tiny hairs labelled ? called?","a":["Cilia","Root hairs","Flagella","Pili"]},
+    {"id":"i11","t":"specialised","img":"cell-ciliated","q":"What is the job of these cells?","a":["Waft mucus and dust out of the airways","Carry oxygen","Contract to cause movement","Absorb water from soil"]},
+    {"id":"i12","t":"specialised","img":"cell-egg","mark":"coat","q":"What does the outer layer labelled ? do?","a":["Protects the cell and attracts sperm","Carries oxygen","Insulates impulses","Absorbs light"]},
+    {"id":"i13","t":"specialised","img":"cell-egg","mark":"cytoplasm","q":"The cytoplasm labelled ? has lots of fat stores. Why?","a":["Food/energy for the growing embryo","To help it swim","To carry oxygen","To absorb water"]},
+    {"id":"i14","t":"specialised","img":"cell-rbc","q":"This cell has no nucleus. Why?","a":["More room to carry oxygen","So it can swim","So it can contract","To store fat"]},
+    {"id":"i15","t":"specialised","img":"cell-rbc","q":"What is the name of this cell's shape?","a":["Biconcave disc","Spiral","Cube","Branched"]},
+    {"id":"i16","t":"specialised","img":"cell-roothair","mark":"roothair","q":"What is the long projection labelled ? for?","a":["Bigger surface area to absorb water faster","To swim through the soil","To carry impulses","To store sugar"]},
+    {"id":"i17","t":"specialised","img":"cell-palisade","mark":"chloroplast","q":"This cell is packed with the parts labelled ?. What are they for?","a":["Photosynthesis","Respiration","Making proteins","Storing cell sap"]},
+    {"id":"i18","t":"specialised","img":"cell-muscle","q":"What does this cell do?","a":["Contracts and relaxes to allow movement","Carries electrical impulses","Transports oxygen","Absorbs water"]},
+    {"id":"i19","t":"states","img":"particles-solid","q":"The particles in this state...","a":["Vibrate around a fixed position","Are far apart","Move at random speeds in random directions","Are arranged randomly"]},
+    {"id":"i20","t":"states","img":"particles-gas","q":"Which property does this state have?","a":["It can be compressed","Fixed shape","Fixed volume","High density"]},
+    {"id":"i21","t":"states","img":"particles-liquid","q":"Which properties does this state have?","a":["Fixed volume, no fixed shape, can flow","Fixed shape and fixed volume","No fixed volume, compressible","Fixed shape, can flow"]},
+    {"id":"i22","t":"changes","img":"changes","q":"The red arrows show changes where heat energy is...","a":["Increasing","Decreasing","Staying the same","Removed completely"]},
+    {"id":"i23","t":"diffusion","img":"diffusion","q":"Overall, which way will these particles spread?","a":["Left to right (high to low concentration)","Right to left (low to high concentration)","They won't move","Only upwards"]},
+    {"id":"i24","t":"diffusion","img":"diffusion","q":"Where is the concentration of particles highest?","a":["On the left","On the right","In the middle","It's the same everywhere"]},
+    {"id":"i25","t":"diffusion","img":"diffusion-even","q":"Diffusion has stopped here. Why?","a":["The particles are evenly spread","The particles have stopped moving","It is a solid","The box is too small"]},
+    {"id":"i26","t":"solutions","img":"dissolving","q":"After dissolving, where has the solute gone?","a":["Its particles have spread between the solvent particles","It has disappeared completely","It has turned into a gas","It has sunk to the bottom"]},
+    {"id":"i27","t":"solutions","img":"mixture","q":"Why is this an impure substance?","a":["More than one substance is mixed together","It contains only one substance","The particles are moving","It is a gas"]},
+    {"id":"i28","t":"separation","img":"chromatography","q":"How many different dyes are in ink X?","a":["2","1","3","4"]},
+    {"id":"i29","t":"separation","img":"chromatography","q":"Ink X is a mixture of which inks?","a":["A and B","A and C","B and C","C only"]},
+    {"id":"i30","t":"separation","img":"chromatography","q":"Which ink is NOT in ink X?","a":["C","A","B","None of them"]},
+    {"id":"i31","t":"separation","img":"chromatography","mark":"pencil","q":"Why is the start line labelled ? drawn in pencil?","a":["Pencil won't dissolve and run in the solvent","Pencil is easier to rub out","Pen would tear the paper","Pencil is darker"],"x":"Ink from a pen would dissolve and separate too, mixing up the results."},
+    {"id":"i32","t":"separation","img":"distillation","mark":"condenser","q":"What happens inside the part labelled ? during distillation?","a":["The gas cools and condenses back into a liquid","The mixture is heated","The salt is collected","The water is filtered"]},
+    {"id":"i33","t":"separation","img":"distillation","mark":"flask","q":"What is left behind in the part labelled ? at the end?","a":["Salt","Pure water","Nothing","Steam"]},
+    {"id":"i34","t":"separation","img":"filtration","mark":"residue","q":"What is the residue?","a":["The insoluble solid left in the filter paper","The liquid that passes through","Dissolved salt","Steam"]},
+    {"id":"i35","t":"separation","img":"filtration","mark":"filtrate","q":"What is the filtrate?","a":["The liquid that passes through the filter paper","The solid caught in the filter paper","The funnel","The undissolved solid"]},
+    {"id":"i36","t":"separation","img":"evaporation","q":"What will be left in the basin when all the water has evaporated?","a":["The solid that was dissolved (e.g. salt crystals)","Nothing at all","Pure water","Sand"]}
   ]
 }

@@ -21,10 +21,22 @@ holding curriculum material; Claude turns that into a question bank the app serv
    - Stick to what the material says, using its wording for definitions. Distractors should be plausible
      (other items from the same table), not silly. Aim for ~10–15 questions per topic, 120–200 total.
    - Mostly 4-option multiple choice; some True/False for misconceptions (with `x`).
-3. Add the test to `docs/tests/index.json`.
-4. Validate: unique ids, every `t` is in `topics`, no duplicate answers, MC has 4 options.
-5. Test locally: `python -m http.server 8765 --bind 127.0.0.1` in `docs/`, open `http://127.0.0.1:8765/?t=<id>`.
-6. Commit and push; Pages updates in about a minute.
+3. **Diagrams.** Look at every image in the material. If it is the kind of picture an exam would show and ask
+   about (labelled apparatus, organism/cell diagrams, particle diagrams, results like chromatograms), draw our
+   own version in `tools/make-diagrams.js`. Don't copy the source images: many are stock/BBC/third-party and the
+   site is public. Images that only illustrate a point don't need a diagram.
+   - Each labellable part gets an anchor `A(partId, cx, cy, lx, ly)`: the point on the part, and where the
+     bubble goes (keep bubbles ≥ 18 units inside the viewBox, away from the drawing).
+   - In the test JSON, `diagrams.<svgName> = { t, title, parts: {partId: "Name"}, name?, find?, modes? }`.
+     The app generates a "name the part labelled ?" question and a "which letter shows the X?" question for every
+     part (`modes: ["name"]` to turn off letters, e.g. when the picture already has letters on it).
+   - `galleries: [{ t, q, items: { svgName: "Answer" } }]` gives "what is this picture?" questions.
+   - Hand-written questions can use `img` and `mark` (one "?" pointer) too.
+   - `node tools/make-diagrams.js`, then check them all on the app's "Study the diagrams" page.
+4. Add the test to `docs/tests/index.json`.
+5. Validate: `node tools/check-test.js docs/tests/<id>.json` (ids, topics, duplicate answers, diagram anchors).
+6. Test locally: `python -m http.server 8765 --bind 127.0.0.1` in `docs/`, open `http://127.0.0.1:8765/?t=<id>`.
+7. Commit and push; Pages updates in about a minute.
 
 ## How the app works
 - Progress is per phone in localStorage (`rev.<testId>`), per question: seen/correct/wrong and a box 0–3.
