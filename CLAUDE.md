@@ -34,15 +34,21 @@ holding curriculum material; Claude turns that into a question bank the app serv
    - Hand-written questions can use `img` and `mark` (one "?" pointer) too.
    - `node tools/make-diagrams.js`, then check them all on the app's "Study the diagrams" page.
 4. Add the test to `docs/tests/index.json`.
-5. Validate: `node tools/check-test.js docs/tests/<id>.json` (ids, topics, duplicate answers, diagram anchors).
-6. Test locally: `python -m http.server 8765 --bind 127.0.0.1` in `docs/`, open `http://127.0.0.1:8765/?t=<id>`.
-7. Commit and push; Pages updates in about a minute.
+5. Give it a finishing word: `node tools/set-word.js <id>` (takes the next unused word from `finish-words.txt`,
+   logs it in `word-assignments.txt`; both files are local only). Tell the user which word it got.
+   Tests are for Joe and Tom, who are different ages, so each test belongs to one boy and has one word.
+6. Validate: `node tools/check-test.js docs/tests/<id>.json` (ids, topics, duplicate answers, diagram anchors).
+7. Test locally: `python -m http.server 8765 --bind 127.0.0.1` in `docs/`, open `http://127.0.0.1:8765/?t=<id>`.
+8. Commit and push; Pages updates in about a minute.
 
 ## How the app works
-- Progress is per phone in localStorage (`rev.<testId>`), per question: seen/correct/wrong and a box 0–3.
-- Right first time and quick (< 60% of the timer) → counts as mastered straight away (diagnostic pass).
-  Wrong → box 0; needs two correct in a row to reach "mastered" (box ≥ 2).
-- Blitz: 30 questions, least-seen first. Focus: weak questions first, then unseen, then review; wrong answers
-  come back 4 questions later (max twice per round). Tapping a topic runs Focus on that topic only.
+- Progress is per phone in localStorage (`rev.<testId>`); per question: s (asked), c, w, ok (last answer correct).
+- Every round is 20 questions. Only questions not yet answered correctly are asked (up to half previous mistakes,
+  the rest new). Already-correct questions are used only to fill a round when fewer than 20 remain.
+  Two questions about the same diagram part are kept out of the same round where possible.
+- When every question is answered correctly (so the final round was 100%), the test is finished: the
+  finishing word is shown on the results and home screens and added to the WhatsApp message.
+- The word is stored XOR-scrambled (key `rev:<testId>`) in the test's `finish` field. It can't be read at a
+  glance, but anyone who decodes the page could find it.
 - "Send result on WhatsApp" opens wa.me with a summary and a short code (hash of the details with a salt
   in the page). It stops casual editing of the message, nothing more; the salt is visible in the source.

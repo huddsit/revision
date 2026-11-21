@@ -74,10 +74,8 @@
 <script>
 "use strict";
 // ---------- settings ----------
-const BLITZ_SIZE = 30, FOCUS_SIZE = 15;
+const ROUND_SIZE = 20;
 const TIME_MC = 15000, TIME_TF = 8000, TIME_IMG = 20000;   // ms allowed per question
-const MASTERED = 2;                      // right this many times in a row = mastered
-const MAX_BOX = 3;
 const SALT = "rev-7c1e";                 // only deters casual editing of shared scores
 
 // ---------- helpers ----------
@@ -93,18 +91,32 @@ const testId = params.get("t");
 let test, state, round;
 
 const storeKey = () => "rev." + testId;
-function load() { try { return JSON.parse(localStorage.getItem(storeKey())) || { q: {}, rounds: [] }; } catch { return { q: {}, rounds: [] }; } }
-function save() { localStorage.setItem(storeKey(), JSON.stringify(state)); }
-const qs = id => state.q[id] || (state.q[id] = { b: 0, s: 0, c: 0, w: 0 });
-const getName = () => localStorage.getItem("rev.name") || "";
-
-function mastery(filterTopic) {
-  const list = test.questions.filter(q => !filterTopic || q.t === filterTopic);
-  const seen = list.filter(q => state.q[q.id]?.s).length;
-  const mastered = list.filter(q => (state.q[q.id]?.b || 0) >= MASTERED).length;
-  return { total: list.length, seen, mastered, p: pct(mastered, list.length) };
+function load() {
+  let s; try { s = JSON.parse(localStorage.getItem(storeKey())); } catch {}
+  s = s || { q: {}, rounds: [] };
+  for (const v of Object.values(s.q)) if (v.ok === undefined) v.ok = v.b > 0;   // older progress format
+  return s;
 }
-const isWeak = q => { const s = state.q[q.id]; return s && s.s && s.b < MASTERED; };
+function save() { localStorage.setItem(storeKey(), JSON.stringify(state)); }
+// per question: s = times asked, c = correct, w = wrong, ok = last answer was correct
+const qs = id => state.q[id] || (state.q[id] = { s: 0, c: 0, w: 0, ok: false });
+const getName = () => localStorage.getItem("rev.name") || "";
+const isOk = q => !!state.q[q.id]?.ok;
+const isWrong = q => !!state.q[q.id]?.s && !state.q[q.id].ok;
+
+function progress(filterTopic) {
+  const list = test.questions.filter(q => !filterTopic || q.t === filterTopic);
+  const done = list.filter(isOk).length, wrong = list.filter(isWrong).length;
+  return { total: list.length, done, wrong, unseen: list.length - done - wrong, p: pct(done, list.length) };
+}
+const allDone = () => test.questions.every(isOk);
+// finishing word: stored lightly scrambled so it isn't readable in the test file
+function finishWord() {
+  if (!test.finish) return null;
+  const k = "rev:" + test.id, b = atob(test.finish);
+  let s = ""; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b.charCodeAt(i) ^ k.charCodeAt(i % k.length));
+  return s;
+}
 
 // ---------- diagrams ----------
 // test.diagrams: { svgName: { t, title, parts: {partId: "Name"}, name?, find?, modes? } }
@@ -200,37 +212,34 @@ function askName() {
 
 // ---------- home ----------
 function home() {
-  const m = mastery();
-  const weak = test.questions.filter(isWeak).length;
-  const unseen = m.total - m.seen;
+  const m = progress();
+  const left = m.total - m.done;
   const topics = Object.entries(test.topics).map(([k, label]) => {
-    const t = mastery(k);
-    const w = test.questions.filter(q => q.t === k && isWeak(q)).length;
-    return `<button class="topic" data-t="${k}">
-      <div class="row"><span>${esc(label)}</span><span>${t.seen ? t.p + "%" : "not tried"}${w ? " · " + w + " to fix" : ""}</span></div>
-      <div class="bar"><i style="width:${t.p}%;background:${colourFor(t.p)}"></i></div></button>`;
+    const t = progress(k);
+    return `<div class="topic">
+      <div class="row"><span>${esc(label)}</span><span>${t.done}/${t.total}${t.wrong ? " · " + t.wrong + " to fix" : ""}</span></div>
+      <div class="bar"><i style="width:${t.p}%;background:${colourFor(t.p)}"></i></div></div>`;
   }).join("");
 
   $app.innerHTML = `
     <h1>${esc(test.title)}</h1>
     <p class="sub">Hi ${esc(getName())} · ${m.total} questions</p>
+    ${state.finished ? wordCard() : ""}
     <div class="stats">
-      <div class="stat"><b>${m.p}%</b><span>mastered</span></div>
-      <div class="stat"><b>${m.seen}/${m.total}</b><span>tried</span></div>
-      <div class="stat"><b>${weak}</b><span>to fix</span></div>
+      <div class="stat"><b>${m.done}/${m.total}</b><span>got right</span></div>
+      <div class="stat"><b>${m.wrong}</b><span>to fix</span></div>
+      <div class="stat"><b>${m.unseen}</b><span>not tried</span></div>
     </div>
-    <button class="btn ${weak ? "" : "primary"}" id="blitz">⚡ Blitz<small>${BLITZ_SIZE} fast questions${unseen ? " · new ones first" : ""}</small></button>
-    <button class="btn ${weak ? "primary" : ""}" id="focus" ${weak ? "" : "disabled"}>🎯 Fix my weak spots<small>${weak ? weak + " questions you got wrong or haven't nailed yet" : "Do a Blitz first"}</small></button>
+    <button class="btn primary" id="go">▶ ${state.finished ? "Practise" : m.done || m.wrong ? "Next" : "Start"} · ${Math.min(ROUND_SIZE, m.total)} questions
+      <small>${left ? `${left} still to get right` : "All done!"}</small></button>
     ${test.diagrams ? `<button class="btn" id="study">📖 Study the diagrams<small>Every diagram, fully labelled</small></button>` : ""}
-    <h2>Topics <span style="font-weight:400;font-size:.85rem">(tap one to practise it)</span></h2>
+    <h2>Topics</h2>
     <div class="card">${topics}</div>
     <p class="center"><button class="link" id="share">Send my progress</button>
       <button class="link" id="who">Not ${esc(getName())}?</button>
       <button class="link" id="reset">Reset progress</button></p>`;
 
-  document.getElementById("blitz").onclick = () => begin("blitz");
-  document.getElementById("focus").onclick = () => begin("focus");
-  document.querySelectorAll(".topic").forEach(b => b.onclick = () => begin("topic", b.dataset.t));
+  document.getElementById("go").onclick = begin;
   if (test.diagrams) document.getElementById("study").onclick = study;
   document.getElementById("share").onclick = () => share(null);
   document.getElementById("who").onclick = askName;
@@ -266,28 +275,30 @@ function study() {
 }
 
 // ---------- choosing questions ----------
-function pick(mode, topic) {
-  const all = test.questions;
-  const seen = q => state.q[q.id]?.s || 0;
-  const box = q => state.q[q.id]?.b || 0;
-  const wrong = q => state.q[q.id]?.w || 0;
-  if (mode === "blitz") {
-    // least-seen first, random within that
-    return shuffle(all).sort((a, b) => seen(a) - seen(b)).slice(0, BLITZ_SIZE);
-  }
-  const pool = topic ? all.filter(q => q.t === topic) : all;
-  const weak = shuffle(pool.filter(isWeak)).sort((a, b) => box(a) - box(b) || wrong(b) - wrong(a));
-  const unseen = shuffle(pool.filter(q => !seen(q)));
-  const review = shuffle(pool.filter(q => seen(q) && !isWeak(q)));
-  return [...weak, ...unseen, ...review].slice(0, FOCUS_SIZE);
+// Only questions not yet answered correctly, unless there aren't enough of them.
+// Up to half the round is previous mistakes, the rest new questions.
+// Two questions about the same diagram part never share a round if it can be avoided (one would give the other away).
+function pick() {
+  const all = shuffle(test.questions);
+  const wrong = all.filter(isWrong), unseen = all.filter(q => !state.q[q.id]?.s), done = all.filter(isOk);
+  const half = Math.ceil(ROUND_SIZE / 2);
+  const groups = [[...wrong.slice(0, half), ...unseen, ...wrong.slice(half)], done];
+  const chosen = [], parts = new Set();
+  const partKey = q => q.img && (q.mark || q.find) ? q.img + ":" + (q.mark || q.find) : null;
+  for (const group of groups)
+    for (const strict of [true, false])
+      for (const q of group) {
+        if (chosen.length >= ROUND_SIZE) break;
+        if (chosen.includes(q) || (strict && parts.has(partKey(q)))) continue;
+        chosen.push(q); if (partKey(q)) parts.add(partKey(q));
+      }
+  return shuffle(chosen);
 }
 
 // ---------- quiz ----------
-function begin(mode, topic) {
-  const list = pick(mode, topic);
-  if (!list.length) return home();
-  round = { mode, topic, queue: list, i: 0, score: 0, streak: 0, best: 0, right: 0, answered: 0,
-            missed: [], times: [], before: mastery().mastered, retries: {} };
+function begin() {
+  round = { queue: pick(), i: 0, score: 0, streak: 0, best: 0, right: 0, answered: 0,
+            missed: [], times: [], before: progress().done };
   ask();
 }
 
@@ -349,24 +360,16 @@ function answer(q, chosen, correct, ms, limit, shown) {
   });
 
   if (ok) {
-    const quick = ms < limit * 0.6;
-    // right first time and quickly = already known; otherwise climb one step per correct answer
-    s.b = (s.s === 1 && quick) ? MASTERED : Math.min(MAX_BOX, s.b + 1);
-    s.c++;
+    s.c++; s.ok = true;
     r.right++; r.streak++; r.best = Math.max(r.best, r.streak);
     r.score += 10 + Math.round(10 * Math.max(0, 1 - ms / limit));   // speed bonus
     save();
     r.i++; setTimeout(ask, 450);
     return;
   }
-  s.w++; s.b = 0; r.streak = 0; save();
+  s.w++; s.ok = false; r.streak = 0; save();
   if (navigator.vibrate) navigator.vibrate(120);
-  if (!r.missed.includes(q)) r.missed.push(q);
-  // in focus rounds, bring a missed question back a few questions later (up to twice)
-  if (r.mode !== "blitz" && (r.retries[q.id] || 0) < 2) {
-    r.retries[q.id] = (r.retries[q.id] || 0) + 1;
-    r.queue.splice(Math.min(r.queue.length, r.i + 4), 0, q);
-  }
+  r.missed.push(q);
   const bubble = document.querySelector(`[data-bubble="${correct}"]`);
   if (q.find && bubble) bubble.setAttribute("fill", "#2bb673");
   document.getElementById("fb").innerHTML = `<div class="feedback">${chosen === null ? "<b>Out of time.</b> " : ""}
@@ -377,24 +380,27 @@ function answer(q, chosen, correct, ms, limit, shown) {
 
 // ---------- results ----------
 function finish() {
-  const r = round, m = mastery();
+  const r = round;
   const acc = pct(r.right, r.answered);
   const avg = r.times.length ? (r.times.reduce((a, b) => a + b, 0) / r.times.length / 1000).toFixed(1) : 0;
-  state.rounds.push({ d: Date.now(), mode: r.mode, topic: r.topic || null, right: r.right, n: r.answered, score: r.score });
+  state.rounds.push({ d: Date.now(), right: r.right, n: r.answered, score: r.score });
+  // every question now answered correctly (which also means this round was 100%)
+  const justFinished = !state.finished && allDone() && r.right === r.answered;
+  if (justFinished) state.finished = Date.now();
   save();
-  const label = r.mode === "blitz" ? "Blitz" : r.topic ? test.topics[r.topic] : "Weak spots";
-  const verdict = acc >= 90 ? "Excellent." : acc >= 70 ? "Good going." : acc >= 50 ? "Getting there." : "Plenty to work on, which is what this is for.";
+  const m = progress(), left = m.total - m.done;
+  const verdict = justFinished ? "You've got every question right." : acc === 100 ? "Perfect round." : acc >= 80 ? "Good going." : acc >= 50 ? "Getting there." : "Plenty to work on, which is what this is for.";
 
   $app.innerHTML = `
-    <h1>${esc(label)} done</h1><p class="sub">${verdict}</p>
+    <h1>${justFinished ? "Finished!" : "Round done"}</h1><p class="sub">${verdict}</p>
+    ${justFinished ? wordCard() : ""}
     <div class="big">${r.right}/${r.answered}</div>
     <p class="center sub">${acc}% · ${r.score} pts · best streak ${r.best} · ${avg}s per question</p>
     <div class="stats">
-      <div class="stat"><b>${m.p}%</b><span>mastered overall</span></div>
-      <div class="stat"><b>${m.mastered - r.before >= 0 ? "+" : ""}${m.mastered - r.before}</b><span>newly mastered</span></div>
+      <div class="stat"><b>${m.done}/${m.total}</b><span>got right overall</span></div>
+      <div class="stat"><b>${left}</b><span>still to get right</span></div>
     </div>
-    <button class="btn primary" id="focus">🎯 Fix my weak spots</button>
-    <button class="btn" id="blitz">⚡ Another Blitz</button>
+    ${left ? `<button class="btn primary" id="again">▶ Next ${Math.min(ROUND_SIZE, m.total)} questions</button>` : ""}
     <button class="btn" id="share">📤 Send result on WhatsApp</button>
     <button class="btn" id="home">Home</button>
     ${r.missed.length ? `<h2>Got wrong this round</h2><div class="card">` + r.missed.map((q, i) =>
@@ -404,20 +410,28 @@ function finish() {
     slot.replaceWith(figure(q.img, part ? { [part]: "✓" } : {}, "small"));
   });
 
-  document.getElementById("focus").onclick = () => begin("focus");
-  document.getElementById("blitz").onclick = () => begin("blitz");
+  if (left) document.getElementById("again").onclick = begin;
   document.getElementById("share").onclick = () => share(r);
   document.getElementById("home").onclick = home;
   window.scrollTo(0, 0);
 }
 
 // ---------- sharing ----------
+function wordCard() {
+  const w = finishWord();
+  return `<div class="card center" style="background:var(--good);color:#fff">
+    <div>🏁 Every question right. Your finishing word is</div>
+    <div style="font-size:2.2rem;font-weight:800;margin:6px 0">${w ? esc(w.toUpperCase()) : "(no word set yet)"}</div>
+    <div>Tell it to whoever set this test.</div></div>`;
+}
+
 function share(r) {
-  const m = mastery(), name = getName();
+  const m = progress(), name = getName();
   const today = new Date().toISOString().slice(0, 10);
-  const line = r ? `${r.mode === "blitz" ? "Blitz" : "Practice"}: ${r.right}/${r.answered} (${pct(r.right, r.answered)}%), ${r.score} pts` : "Progress check";
-  const core = [name, test.id, today, line, m.mastered, m.total].join("|");
-  const text = `📚 ${name}: ${test.title}\n${line}\nMastered: ${m.mastered}/${m.total} (${m.p}%) · tried ${m.seen}\n${today} · code ${hash(SALT + core)}`;
+  const line = r ? `Round: ${r.right}/${r.answered} (${pct(r.right, r.answered)}%), ${r.score} pts` : "Progress check";
+  const core = [name, test.id, today, line, m.done, m.total].join("|");
+  const text = `📚 ${name}: ${test.title}\n${line}\nGot right: ${m.done}/${m.total} (${m.p}%) · to fix ${m.wrong}` +
+    (state.finished ? "\n🏁 Finished! Word: " + (finishWord() || "?").toUpperCase() : "") + `\n${today} · code ${hash(SALT + core)}`;
   location.href = "https://wa.me/?text=" + encodeURIComponent(text);
 }
 

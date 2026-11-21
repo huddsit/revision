@@ -206,6 +206,7 @@
       }
     }
   ],
+  "finish": "BQQaSAYQ",
   "questions": [
     {"id":"o1","t":"organelles","q":"Which part of the cell controls the cell and contains the DNA?","a":["Nucleus","Cytoplasm","Cell membrane","Ribosome"]},
     {"id":"o2","t":"organelles","q":"What does the nucleus do?","a":["Controls the cell and contains the DNA","Releases energy through respiration","Controls what enters and leaves the cell","Carries out photosynthesis"]},
