@@ -56,7 +56,7 @@ const YEL = "#ffe08a";
 { // states of matter, one per picture
   let r = rng(11);
   write("particles-solid", 200, 200, box(10, 10, 180) + solidParticles(10, 10, 180, 12.5, YEL));
-  write("particles-liquid", 200, 200, box(10, 10, 180) + liquidParticles(r, 10, 10, 180, 12.5, YEL));
+  write("particles-liquid", 200, 200, liquidParticles(r, 10, 10, 180, 12.5, YEL));
   write("particles-gas", 200, 200, box(10, 10, 180) + gasParticles(rng(5), 10, 10, 180, 12.5, YEL, 6));
 }
 
