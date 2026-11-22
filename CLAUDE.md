@@ -48,8 +48,8 @@ holding curriculum material; Claude turns that into a question bank the app serv
 
 ## How the app works
 - Progress is per phone in localStorage (`rev.<testId>`); per question: s (asked), c, w, ok (last answer correct).
-- Every round is 20 questions. Only questions not yet answered correctly are asked (up to half previous mistakes,
-  the rest new). Already-correct questions are used only to fill a round when fewer than 20 remain.
+- Every round is 10 questions. Only questions not yet answered correctly are asked (up to half previous mistakes,
+  the rest new). Already-correct questions are used only to fill a round when fewer than 10 remain.
   Two questions about the same diagram part are kept out of the same round where possible.
 - When every question is answered correctly (so the final round was 100%), the test is finished: the
   finishing word is shown on the results and home screens and added to the WhatsApp message.
