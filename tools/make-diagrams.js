@@ -50,14 +50,13 @@ function liquidParticles(rand, x0, y0, size, r, fill) {
 function gasParticles(rand, x0, y0, size, r, fill, count) {
   return placeRandom(rand, count, x0, y0, size, size, r, r * 4).map(p => circ(p.x, p.y, r, fill)).join("");
 }
-const box = (x, y, s) => `<rect x="${x}" y="${y}" width="${s}" height="${s}" fill="#fff" stroke="#222" stroke-width="2.5"/>`;
 const YEL = "#ffe08a";
 
 { // states of matter, one per picture
   let r = rng(11);
-  write("particles-solid", 200, 200, box(10, 10, 180) + solidParticles(10, 10, 180, 12.5, YEL));
+  write("particles-solid", 200, 200, solidParticles(10, 10, 180, 12.5, YEL));
   write("particles-liquid", 200, 200, liquidParticles(r, 10, 10, 180, 12.5, YEL));
-  write("particles-gas", 200, 200, box(10, 10, 180) + gasParticles(rng(5), 10, 10, 180, 12.5, YEL, 6));
+  write("particles-gas", 200, 200, gasParticles(rng(5), 10, 10, 180, 12.5, YEL, 6));
 }
 
 { // changes of state
@@ -69,9 +68,9 @@ const YEL = "#ffe08a";
   };
   const label = (x, t) => `<text x="${x}" y="188" text-anchor="middle" font-size="17" font-weight="700" fill="#222">${t}</text>`;
   const body =
-    box(10, 60, S) + solidParticles(10, 60, S, 8, YEL) +
-    box(160, 60, S) + liquidParticles(r, 160, 60, S, 8, YEL) +
-    box(310, 60, S) + gasParticles(rng(9), 310, 60, S, 8, YEL, 5) +
+    solidParticles(10, 60, S, 8, YEL) +
+    liquidParticles(r, 160, 60, S, 8, YEL) +
+    gasParticles(rng(9), 310, 60, S, 8, YEL, 5) +
     label(60, "Solid") + label(210, "Liquid") + label(360, "Gas") +
     arrow(116, 154, 88, "#c92a2a") + arrow(266, 304, 88, "#c92a2a") +
     arrow(154, 116, 132, "#1c7ed6") + arrow(304, 266, 132, "#1c7ed6");
