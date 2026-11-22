@@ -11,7 +11,8 @@ fs.mkdirSync(OUT, { recursive: true });
 
 // deterministic random so diagrams don't change between runs
 function rng(seed) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-const A = (part, cx, cy, lx, ly) => `<circle data-part="${part}" cx="${cx}" cy="${cy}" r="0" data-lx="${lx}" data-ly="${ly}"/>`;
+// r (optional): for small parts, the pointer draws a ring of this radius round the part instead of covering it
+const A = (part, cx, cy, lx, ly, r) => `<circle data-part="${part}" cx="${cx}" cy="${cy}" r="0" data-lx="${lx}" data-ly="${ly}"${r ? ` data-r="${r}"` : ""}/>`;
 function write(name, w, h, body, anchors = []) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" font-family="system-ui, sans-serif">\n${body}\n<g class="anchors">${anchors.join("")}</g>\n</svg>\n`;
   fs.writeFileSync(path.join(OUT, name + ".svg"), svg);
@@ -112,16 +113,17 @@ const YEL = "#ffe08a";
 // ---------- cells ----------
 const mito = (x, y, rot = 0) => `<g transform="translate(${x} ${y}) rotate(${rot})"><ellipse rx="13" ry="7" fill="#f4c27a" stroke="#8a5a12" stroke-width="1.5"/><path d="M-9,0 l3,-4 3,7 3,-7 3,7 3,-4" fill="none" stroke="#8a5a12" stroke-width="1.2"/></g>`;
 const dot = (x, y, f = "#333") => `<circle cx="${x}" cy="${y}" r="2.6" fill="${f}"/>`;
+const ribo = (x, y) => `<circle cx="${x}" cy="${y}" r="4" fill="#1d3b8f"/>`;   // ribosomes: bigger and darker than other dots
 
 { // animal cell
   const body =
     `<path d="M110,150 C100,80 180,50 240,60 C310,70 320,130 305,180 C290,240 220,255 160,240 C120,230 112,190 110,150 Z" fill="#fbc9c9" stroke="#b5474b" stroke-width="3"/>` +
     `<ellipse cx="170" cy="120" rx="36" ry="30" fill="#7a3b3b" stroke="#4d2020" stroke-width="2"/>` +
     mito(250, 110, 20) + mito(235, 205, -15) + mito(150, 205, 30) +
-    [[140, 170], [200, 175], [270, 150], [215, 90], [130, 110], [185, 225], [255, 230], [280, 195], [210, 140]].map(([x, y]) => dot(x, y)).join("");
+    [[140, 170], [200, 175], [270, 150], [215, 90], [130, 110], [185, 225], [255, 230], [280, 195], [210, 140]].map(([x, y]) => ribo(x, y)).join("");
   write("animal-cell", 400, 300, body, [
     A("nucleus", 170, 120, 40, 60), A("mitochondria", 250, 110, 360, 50), A("cytoplasm", 245, 165, 360, 125),
-    A("ribosome", 140, 170, 40, 210), A("membrane", 311, 160, 360, 215)]);
+    A("ribosome", 140, 170, 40, 210, 9), A("membrane", 311, 160, 360, 215)]);
 }
 
 { // plant cell
@@ -132,11 +134,11 @@ const dot = (x, y, f = "#333") => `<circle cx="${x}" cy="${y}" r="2.6" fill="${f
     `<rect x="150" y="92" width="118" height="132" rx="14" fill="#fdf6d8" stroke="#b9a56a" stroke-width="2"/>` +
     chl.map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="12" ry="6.5" transform="rotate(${r} ${x} ${y})" fill="#3f9c35" stroke="#24601d" stroke-width="1.5"/>`).join("") +
     `<ellipse cx="138" cy="80" rx="19" ry="15" fill="#7a3b3b" stroke="#4d2020" stroke-width="2"/>` +
-    mito(255, 80, 10) + [[283, 228], [140, 230], [205, 80], [143, 150]].map(([x, y]) => dot(x, y)).join("");
+    mito(255, 80, 10) + [[278, 225], [140, 230], [205, 80], [143, 150]].map(([x, y]) => ribo(x, y)).join("");
   write("plant-cell", 400, 300, body, [
     A("cellwall", 104, 240, 40, 262), A("membrane", 111, 112, 40, 120), A("nucleus", 138, 80, 40, 45),
     A("cytoplasm", 140, 190, 40, 190), A("vacuole", 210, 160, 360, 175), A("chloroplast", 280, 150, 360, 125),
-    A("mitochondria", 255, 80, 360, 60), A("ribosome", 283, 228, 360, 240)]);
+    A("mitochondria", 255, 80, 360, 60), A("ribosome", 278, 225, 360, 240, 7)]);
 }
 
 { // bacterium
@@ -148,11 +150,11 @@ const dot = (x, y, f = "#333") => `<circle cx="${x}" cy="${y}" r="2.6" fill="${f
     `<rect x="142" y="122" width="136" height="66" rx="33" fill="#f8f1d6" stroke="#b0a050" stroke-width="2"/>` +
     `<path d="M175,150 C185,130 215,135 220,150 C228,170 250,160 245,145 C240,128 205,175 195,168 C185,160 230,140 235,165 C238,178 200,178 190,170" fill="none" stroke="#8e44ad" stroke-width="2.5"/>` +
     `<circle cx="160" cy="140" r="7" fill="none" stroke="#c2255c" stroke-width="2.5"/>` +
-    [[165, 175], [258, 135], [262, 172], [210, 181], [230, 130]].map(([x, y]) => dot(x, y)).join("");
+    [[165, 175], [258, 135], [262, 172], [210, 181], [230, 130]].map(([x, y]) => ribo(x, y)).join("");
   write("bacterium", 400, 300, body, [
     A("pili", 200, 90, 200, 35), A("cellwall", 131, 155, 40, 155), A("membrane", 250, 122, 310, 40),
     A("cytoplasm", 255, 168, 300, 270), A("dna", 220, 150, 210, 280), A("plasmid", 160, 140, 40, 90),
-    A("ribosome", 165, 175, 40, 225), A("flagellum", 345, 155, 365, 240)]);
+    A("ribosome", 165, 175, 40, 225, 9), A("flagellum", 345, 155, 365, 240)]);
 }
 
 { // specialised cells (300 x 180)

@@ -169,10 +169,16 @@ function figure(img, marks = {}, cls = "") {
   for (const [part, text] of Object.entries(marks)) {
     const a = svg.querySelector(`[data-part="${part}"]`);
     if (!a) continue;
-    const [cx, cy, lx, ly] = ["cx", "cy", "data-lx", "data-ly"].map(k => a.getAttribute(k));
-    el(svg, "line", { x1: lx, y1: ly, x2: cx, y2: cy, stroke: "#fff", "stroke-width": 6, "stroke-linecap": "round" });
-    el(svg, "line", { x1: lx, y1: ly, x2: cx, y2: cy, stroke: "#e8590c", "stroke-width": 2.5 });
-    el(svg, "circle", { cx, cy, r: 4.5, fill: "#e8590c", stroke: "#fff", "stroke-width": 1.5 });
+    const [cx, cy, lx, ly] = ["cx", "cy", "data-lx", "data-ly"].map(k => +a.getAttribute(k));
+    const ring = +a.getAttribute("data-r") || 0;   // small part: ring round it, so the pointer doesn't hide it
+    const d = Math.hypot(lx - cx, ly - cy) || 1;
+    const ex = cx + (lx - cx) * ring / d, ey = cy + (ly - cy) * ring / d;
+    el(svg, "line", { x1: lx, y1: ly, x2: ex, y2: ey, stroke: "#fff", "stroke-width": 6, "stroke-linecap": "round" });
+    el(svg, "line", { x1: lx, y1: ly, x2: ex, y2: ey, stroke: "#e8590c", "stroke-width": 2.5 });
+    if (ring) {
+      el(svg, "circle", { cx, cy, r: ring, fill: "none", stroke: "#fff", "stroke-width": 5 });
+      el(svg, "circle", { cx, cy, r: ring, fill: "none", stroke: "#e8590c", "stroke-width": 2.5 });
+    } else el(svg, "circle", { cx, cy, r: 4.5, fill: "#e8590c", stroke: "#fff", "stroke-width": 1.5 });
     el(svg, "circle", { cx: lx, cy: ly, r: 16, fill: "#fca311", stroke: "#14213d", "stroke-width": 2, "data-bubble": text });
     el(svg, "text", { x: lx, y: +ly + 6.5, "text-anchor": "middle", "font-size": 18, "font-weight": 800, fill: "#14213d" }, text);
   }
