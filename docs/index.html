@@ -75,7 +75,7 @@
 "use strict";
 // ---------- settings ----------
 const ROUND_SIZE = 20;
-const TIME_MC = 15000, TIME_TF = 8000, TIME_IMG = 20000;   // ms allowed per question
+const TIME_MC = 20000, TIME_TF = 10000, TIME_IMG = 25000;   // ms allowed per question
 const SALT = "rev-7c1e";                 // only deters casual editing of shared scores
 
 // ---------- helpers ----------
@@ -119,7 +119,7 @@ function finishWord() {
 }
 
 // ---------- diagrams ----------
-// test.diagrams: { svgName: { t, title, parts: {partId: "Name"}, name?, find?, modes? } }
+// test.diagrams: { svgName: { t, title, parts: {partId: "Name"}, name?, find?, modes?, skip? } }
 //   -> per part: "name" question (pointer + "?"), "find" question (letters A-D on parts)
 // test.galleries: [{ t, q, items: { svgName: "Answer" } }] -> "what is this picture?" questions
 // Any question may also carry img (+ mark) directly.
@@ -129,6 +129,7 @@ function buildDiagramQuestions() {
   for (const [img, d] of Object.entries(test.diagrams || {})) {
     const ids = Object.keys(d.parts), modes = d.modes || ["name", "find"];
     for (const p of ids) {
+      if ((d.skip || []).includes(p)) continue;   // too obvious to ask about
       const name = d.parts[p];
       const others = shuffle(ids.filter(x => x !== p)).slice(0, 3).map(x => d.parts[x]);
       if (modes.includes("name")) test.questions.push({ id: `d.${img}.${p}`, t: d.t, img, mark: p,

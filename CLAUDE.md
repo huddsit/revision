@@ -18,6 +18,11 @@ holding curriculum material; Claude turns that into a question bank the app serv
    - `topics`: short key → display label (aim for 6–12 topics).
    - each question: `id`, `t` (topic key), `q`, `a` (**correct answer first**; the app shuffles), optional
      `tf: true` for True/False (a must contain "True" and "False"), optional `x` explanation shown when wrong.
+   - **Pitch it for a bright pupil.** Before finishing, go through every question (including diagram ones) and
+     ask how a pupil in the top 75% of the class would find it. Cut giveaways: general knowledge, absurd
+     distractors, the same fact asked both ways, obvious diagram parts (use `skip`). Prefer application,
+     comparison, "which is NOT", cause and effect, short scenarios; True/False only for real misconceptions.
+     Keep options similar in length and detail, so the right answer isn't the longest. Check this with a script.
    - Stick to what the material says, using its wording for definitions. Distractors should be plausible
      (other items from the same table), not silly. Aim for ~10–15 questions per topic, 120–200 total.
    - Mostly 4-option multiple choice; some True/False for misconceptions (with `x`).

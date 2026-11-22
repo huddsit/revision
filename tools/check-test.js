@@ -21,7 +21,8 @@ for (const [img, d] of Object.entries(t.diagrams || {})) {
   const s = svg(img); if (!s) { err("missing diagram", img); continue; }
   if (!t.topics[d.t]) err("unknown topic", img, d.t);
   for (const p in d.parts) if (!s.includes(`data-part="${p}"`)) err("missing anchor", img, p);
-  auto += Object.keys(d.parts).length * (d.modes || ["name", "find"]).length;
+  for (const p of d.skip || []) if (!d.parts[p]) err("skip names unknown part", img, p);
+  auto += (Object.keys(d.parts).length - (d.skip || []).length) * (d.modes || ["name", "find"]).length;
 }
 for (const g of t.galleries || []) {
   if (!t.topics[g.t]) err("unknown topic", g.q, g.t);
